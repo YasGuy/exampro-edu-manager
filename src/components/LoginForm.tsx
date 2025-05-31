@@ -21,15 +21,15 @@ const LoginForm = () => {
       const success = await login(email, password);
       if (!success) {
         toast({
-          title: "Login Failed",
-          description: "Invalid email or password",
+          title: "Connexion Échouée",
+          description: "Email ou mot de passe invalide",
           variant: "destructive"
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An error occurred during login",
+        title: "Erreur",
+        description: "Une erreur s'est produite lors de la connexion",
         variant: "destructive"
       });
     } finally {
@@ -38,54 +38,56 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB] font-inter">
+      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg border border-gray-200">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">ExamPro</h2>
-          <p className="mt-2 text-sm text-gray-600">Educational Management System</p>
+          <h1 className="text-3xl font-bold text-[#1E293B] font-inter uppercase">ExamPro</h1>
+          <p className="mt-2 text-sm text-[#6B7280] font-inter">Système de Gestion Éducative</p>
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-[#111827] font-inter">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Enter your email"
+                placeholder="Entrez votre email"
+                className="font-inter"
               />
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-[#111827] font-inter">Mot de passe</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Enter your password"
+                placeholder="Entrez votre mot de passe"
+                className="font-inter"
               />
             </div>
           </div>
 
           <Button
             type="submit"
-            className="w-full"
+            className="w-full bg-[#22C55E] hover:bg-[#22C55E]/90 font-inter"
             disabled={isLoading}
           >
-            {isLoading ? 'Signing in...' : 'Sign in'}
+            {isLoading ? 'Connexion...' : 'Se connecter'}
           </Button>
         </form>
 
-        <div className="mt-6 text-xs text-gray-500 space-y-1">
-          <p><strong>Demo Accounts:</strong></p>
-          <p>Admin: admin@exampro.com / admin123</p>
-          <p>Director: director@exampro.com / director123</p>
-          <p>Teacher: teacher@exampro.com / teacher123</p>
-          <p>Student: student@exampro.com / student123</p>
+        <div className="mt-6 text-xs text-[#6B7280] space-y-1 font-inter">
+          <p><strong>Comptes de Démonstration :</strong></p>
+          <p>Admin : admin@exampro.com / admin123</p>
+          <p>Directeur : director@exampro.com / director123</p>
+          <p>Enseignant : teacher@exampro.com / teacher123</p>
+          <p>Étudiant : student@exampro.com / student123</p>
         </div>
       </div>
     </div>

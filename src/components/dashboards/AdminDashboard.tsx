@@ -16,9 +16,9 @@ interface User {
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState<User[]>([
-    { id: '1', name: 'Academic Director', email: 'director@exampro.com', role: 'director' },
-    { id: '2', name: 'John Teacher', email: 'teacher@exampro.com', role: 'teacher' },
-    { id: '3', name: 'Jane Student', email: 'student@exampro.com', role: 'student' },
+    { id: '1', name: 'Directeur Académique', email: 'director@exampro.com', role: 'director' },
+    { id: '2', name: 'Jean Enseignant', email: 'teacher@exampro.com', role: 'teacher' },
+    { id: '3', name: 'Marie Étudiante', email: 'student@exampro.com', role: 'student' },
   ]);
   
   const [newUser, setNewUser] = useState({
@@ -38,129 +38,147 @@ const AdminDashboard = () => {
     setUsers([...users, user]);
     setNewUser({ name: '', email: '', role: 'student' });
     toast({
-      title: "User Added",
-      description: `${user.name} has been added successfully.`
+      title: "Utilisateur Ajouté",
+      description: `${user.name} a été ajouté avec succès.`
     });
   };
 
   const handleDeleteUser = (id: string) => {
     setUsers(users.filter(u => u.id !== id));
     toast({
-      title: "User Deleted",
-      description: "User has been removed from the system."
+      title: "Utilisateur Supprimé",
+      description: "L'utilisateur a été retiré du système."
     });
   };
 
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'administrator': return 'Administrateur';
+      case 'director': return 'Directeur';
+      case 'teacher': return 'Enseignant';
+      case 'student': return 'Étudiant';
+      default: return role;
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-[#F9FAFB] min-h-screen p-6 font-inter">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Administrator Dashboard</h2>
-        <p className="text-gray-600">Manage all user accounts and system settings</p>
+        <h1 className="text-2xl font-bold text-[#1E293B] font-inter uppercase">Tableau de Bord Administrateur</h1>
+        <p className="text-[#6B7280] font-inter">Gérer tous les comptes utilisateur et les paramètres système</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="bg-white border-gray-200">
           <CardHeader>
-            <CardTitle>Add New User</CardTitle>
-            <CardDescription>Create a new user account</CardDescription>
+            <CardTitle className="text-[#1E293B] font-inter font-semibold">Ajouter un Nouvel Utilisateur</CardTitle>
+            <CardDescription className="text-[#6B7280] font-inter">Créer un nouveau compte utilisateur</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAddUser} className="space-y-4">
               <div>
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name" className="text-[#111827] font-inter">Nom</Label>
                 <Input
                   id="name"
                   value={newUser.name}
                   onChange={(e) => setNewUser({...newUser, name: e.target.value})}
                   required
+                  className="font-inter"
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-[#111827] font-inter">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={newUser.email}
                   onChange={(e) => setNewUser({...newUser, email: e.target.value})}
                   required
+                  className="font-inter"
                 />
               </div>
               <div>
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role" className="text-[#111827] font-inter">Rôle</Label>
                 <select
                   id="role"
                   value={newUser.role}
                   onChange={(e) => setNewUser({...newUser, role: e.target.value})}
-                  className="w-full p-2 border border-gray-300 rounded-md"
+                  className="w-full p-2 border border-gray-300 rounded-md font-inter text-[#111827]"
                 >
-                  <option value="student">Student</option>
-                  <option value="teacher">Teacher</option>
-                  <option value="director">Director</option>
+                  <option value="student">Étudiant</option>
+                  <option value="teacher">Enseignant</option>
+                  <option value="director">Directeur</option>
                 </select>
               </div>
-              <Button type="submit" className="w-full">Add User</Button>
+              <Button type="submit" className="w-full bg-[#22C55E] hover:bg-[#22C55E]/90 font-inter">
+                Ajouter l'Utilisateur
+              </Button>
             </form>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-gray-200">
           <CardHeader>
-            <CardTitle>System Settings</CardTitle>
-            <CardDescription>Configure system parameters</CardDescription>
+            <CardTitle className="text-[#1E293B] font-inter font-semibold">Paramètres Système</CardTitle>
+            <CardDescription className="text-[#6B7280] font-inter">Configurer les paramètres du système</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="institution">Institution Name</Label>
-              <Input id="institution" defaultValue="ExamPro University" />
+              <Label htmlFor="institution" className="text-[#111827] font-inter">Nom de l'Institution</Label>
+              <Input id="institution" defaultValue="Université ExamPro" className="font-inter" />
             </div>
             <div>
-              <Label htmlFor="academic-year">Academic Year</Label>
-              <Input id="academic-year" defaultValue="2023-2024" />
+              <Label htmlFor="academic-year" className="text-[#111827] font-inter">Année Académique</Label>
+              <Input id="academic-year" defaultValue="2023-2024" className="font-inter" />
             </div>
             <div>
-              <Label htmlFor="announcement">System Announcement</Label>
+              <Label htmlFor="announcement" className="text-[#111827] font-inter">Annonce Système</Label>
               <Textarea 
                 id="announcement" 
-                placeholder="Enter system-wide announcement..."
+                placeholder="Entrez une annonce système..."
                 rows={3}
+                className="font-inter"
               />
             </div>
-            <Button className="w-full">Update Settings</Button>
+            <Button className="w-full bg-[#22C55E] hover:bg-[#22C55E]/90 font-inter">
+              Mettre à Jour les Paramètres
+            </Button>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle>User Management</CardTitle>
-          <CardDescription>View and manage all users</CardDescription>
+          <CardTitle className="text-[#1E293B] font-inter font-semibold">Gestion des Utilisateurs</CardTitle>
+          <CardDescription className="text-[#6B7280] font-inter">Voir et gérer tous les utilisateurs</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-gray-300">
               <thead>
-                <tr className="bg-gray-50">
-                  <th className="border border-gray-300 px-4 py-2 text-left">Name</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Email</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Role</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Actions</th>
+                <tr className="bg-[#1E293B]">
+                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">Nom</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">Email</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">Rôle</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
                   <tr key={user.id}>
-                    <td className="border border-gray-300 px-4 py-2">{user.name}</td>
-                    <td className="border border-gray-300 px-4 py-2">{user.email}</td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      <span className="capitalize">{user.role}</span>
+                    <td className="border border-gray-300 px-4 py-2 font-inter text-[#111827]">{user.name}</td>
+                    <td className="border border-gray-300 px-4 py-2 font-inter text-[#111827]">{user.email}</td>
+                    <td className="border border-gray-300 px-4 py-2 font-inter text-[#111827]">
+                      <span className="capitalize">{getRoleLabel(user.role)}</span>
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
                       <Button
                         variant="destructive"
                         size="sm"
                         onClick={() => handleDeleteUser(user.id)}
+                        className="font-inter"
                       >
-                        Delete
+                        Supprimer
                       </Button>
                     </td>
                   </tr>

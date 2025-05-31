@@ -34,14 +34,14 @@ interface Exam {
 
 const TeacherDashboard = () => {
   const [modules] = useState<Module[]>([
-    { id: '1', name: 'Data Structures', code: 'CS101' },
-    { id: '2', name: 'Database Systems', code: 'CS201' }
+    { id: '1', name: 'Structures de Données', code: 'INFO101' },
+    { id: '2', name: 'Systèmes de Base de Données', code: 'INFO201' }
   ]);
 
   const [students] = useState<Student[]>([
-    { id: '1', name: 'Jane Student', email: 'jane@student.com' },
-    { id: '2', name: 'John Doe', email: 'john@student.com' },
-    { id: '3', name: 'Alice Smith', email: 'alice@student.com' }
+    { id: '1', name: 'Marie Dubois', email: 'marie@etudiant.com' },
+    { id: '2', name: 'Pierre Martin', email: 'pierre@etudiant.com' },
+    { id: '3', name: 'Sophie Laurent', email: 'sophie@etudiant.com' }
   ]);
 
   const [grades, setGrades] = useState<Grade[]>([
@@ -51,8 +51,8 @@ const TeacherDashboard = () => {
   ]);
 
   const [exams] = useState<Exam[]>([
-    { id: '1', moduleName: 'Data Structures', date: '2024-06-15', time: '09:00', room: 'Room A101' },
-    { id: '2', moduleName: 'Database Systems', date: '2024-06-16', time: '14:00', room: 'Room B202' }
+    { id: '1', moduleName: 'Structures de Données', date: '2024-06-15', time: '09:00', room: 'Salle A101' },
+    { id: '2', moduleName: 'Systèmes de Base de Données', date: '2024-06-16', time: '14:00', room: 'Salle B202' }
   ]);
 
   const [selectedModule, setSelectedModule] = useState('1');
@@ -72,7 +72,7 @@ const TeacherDashboard = () => {
     
     Object.entries(newGrades).forEach(([studentId, gradeValue]) => {
       const grade = parseFloat(gradeValue);
-      if (!isNaN(grade) && grade >= 0 && grade <= 100) {
+      if (!isNaN(grade) && grade >= 0 && grade <= 20) {
         const existingIndex = updatedGrades.findIndex(
           g => g.studentId === studentId && g.moduleId === selectedModule
         );
@@ -92,37 +92,37 @@ const TeacherDashboard = () => {
     setGrades(updatedGrades);
     setNewGrades({});
     toast({
-      title: "Grades Saved",
-      description: "Student grades have been updated successfully."
+      title: "Notes sauvegardées",
+      description: "Les notes des étudiants ont été mises à jour avec succès."
     });
   };
 
-  const getStudentGrade = (studentId: string, moduleId: string) => {
+  const getStudentGrade = (studentId: string, moduleId: string): number => {
     const grade = grades.find(g => g.studentId === studentId && g.moduleId === moduleId);
-    return grade ? grade.grade : '';
+    return grade ? grade.grade : 0;
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-[#F9FAFB] min-h-screen p-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Teacher Dashboard</h2>
-        <p className="text-gray-600">Manage student grades and view exam schedules</p>
+        <h1 className="text-2xl font-bold text-[#1E293B] font-inter uppercase">Tableau de Bord Enseignant</h1>
+        <p className="text-[#6B7280] font-inter">Gérer les notes des étudiants et consulter les plannings d'examens</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="bg-white border-gray-200">
           <CardHeader>
-            <CardTitle>Enter Student Grades</CardTitle>
-            <CardDescription>Select a module and enter grades for students</CardDescription>
+            <CardTitle className="text-[#1E293B] font-inter font-semibold">Saisie des Notes</CardTitle>
+            <CardDescription className="text-[#6B7280] font-inter">Sélectionnez un module et saisissez les notes des étudiants</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="module-select">Select Module</Label>
+              <Label htmlFor="module-select" className="text-[#111827] font-inter">Sélectionner un Module</Label>
               <select
                 id="module-select"
                 value={selectedModule}
                 onChange={(e) => setSelectedModule(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
+                className="w-full p-2 border border-gray-300 rounded-md font-inter text-[#111827]"
               >
                 {modules.map(m => (
                   <option key={m.id} value={m.id}>{m.name} ({m.code})</option>
@@ -132,37 +132,37 @@ const TeacherDashboard = () => {
 
             <div className="space-y-3">
               {students.map(student => (
-                <div key={student.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={student.id} className="flex items-center justify-between p-3 border rounded-lg bg-[#F9FAFB]">
                   <div>
-                    <p className="font-medium">{student.name}</p>
-                    <p className="text-sm text-gray-600">{student.email}</p>
+                    <p className="font-medium text-[#111827] font-inter">{student.name}</p>
+                    <p className="text-sm text-[#6B7280] font-inter">{student.email}</p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Input
                       type="number"
                       min="0"
-                      max="100"
-                      placeholder={getStudentGrade(student.id, selectedModule).toString() || "Grade"}
+                      max="20"
+                      placeholder={getStudentGrade(student.id, selectedModule).toString() || "Note"}
                       value={newGrades[student.id] || ''}
                       onChange={(e) => handleGradeChange(student.id, e.target.value)}
-                      className="w-20"
+                      className="w-20 font-inter"
                     />
-                    <span className="text-sm text-gray-500">/100</span>
+                    <span className="text-sm text-[#6B7280] font-inter">/20</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <Button onClick={handleSaveGrades} className="w-full">
-              Save Grades
+            <Button onClick={handleSaveGrades} className="w-full bg-[#22C55E] hover:bg-[#22C55E]/90 font-inter">
+              Sauvegarder les Notes
             </Button>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-gray-200">
           <CardHeader>
-            <CardTitle>My Modules</CardTitle>
-            <CardDescription>Modules assigned to you</CardDescription>
+            <CardTitle className="text-[#1E293B] font-inter font-semibold">Mes Modules</CardTitle>
+            <CardDescription className="text-[#6B7280] font-inter">Modules qui vous sont assignés</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -173,11 +173,11 @@ const TeacherDashboard = () => {
                   : 0;
 
                 return (
-                  <div key={module.id} className="p-4 border rounded-lg">
-                    <h4 className="font-semibold">{module.name}</h4>
-                    <p className="text-sm text-gray-600">Code: {module.code}</p>
-                    <p className="text-sm text-gray-600">
-                      Students: {students.length} | Avg Grade: {avgGrade.toFixed(1)}
+                  <div key={module.id} className="p-4 border rounded-lg bg-[#F9FAFB]">
+                    <h4 className="font-semibold text-[#111827] font-inter">{module.name}</h4>
+                    <p className="text-sm text-[#6B7280] font-inter">Code: {module.code}</p>
+                    <p className="text-sm text-[#6B7280] font-inter">
+                      Étudiants: {students.length} | Note Moyenne: {avgGrade.toFixed(1)}
                     </p>
                   </div>
                 );
@@ -187,29 +187,29 @@ const TeacherDashboard = () => {
         </Card>
       </div>
 
-      <Card>
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle>Exam Schedule</CardTitle>
-          <CardDescription>Upcoming exams for your modules</CardDescription>
+          <CardTitle className="text-[#1E293B] font-inter font-semibold">Planning des Examens</CardTitle>
+          <CardDescription className="text-[#6B7280] font-inter">Examens à venir pour vos modules</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-gray-300">
               <thead>
-                <tr className="bg-gray-50">
-                  <th className="border border-gray-300 px-4 py-2 text-left">Module</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Date</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Time</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Room</th>
+                <tr className="bg-[#1E293B]">
+                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">Module</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">Date</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">Heure</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">Salle</th>
                 </tr>
               </thead>
               <tbody>
                 {exams.map(exam => (
                   <tr key={exam.id}>
-                    <td className="border border-gray-300 px-4 py-2">{exam.moduleName}</td>
-                    <td className="border border-gray-300 px-4 py-2">{exam.date}</td>
-                    <td className="border border-gray-300 px-4 py-2">{exam.time}</td>
-                    <td className="border border-gray-300 px-4 py-2">{exam.room}</td>
+                    <td className="border border-gray-300 px-4 py-2 font-inter text-[#111827]">{exam.moduleName}</td>
+                    <td className="border border-gray-300 px-4 py-2 font-inter text-[#111827]">{exam.date}</td>
+                    <td className="border border-gray-300 px-4 py-2 font-inter text-[#111827]">{exam.time}</td>
+                    <td className="border border-gray-300 px-4 py-2 font-inter text-[#111827]">{exam.room}</td>
                   </tr>
                 ))}
               </tbody>
@@ -218,24 +218,24 @@ const TeacherDashboard = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle>Grade Overview</CardTitle>
-          <CardDescription>Current grades by module</CardDescription>
+          <CardTitle className="text-[#1E293B] font-inter font-semibold">Aperçu des Notes</CardTitle>
+          <CardDescription className="text-[#6B7280] font-inter">Notes actuelles par module</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {modules.map(module => (
               <div key={module.id}>
-                <h4 className="font-semibold mb-2">{module.name} ({module.code})</h4>
+                <h4 className="font-semibold mb-2 text-[#111827] font-inter">{module.name} ({module.code})</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   {students.map(student => {
                     const grade = getStudentGrade(student.id, module.id);
                     return (
-                      <div key={student.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                        <span className="text-sm">{student.name}</span>
-                        <span className={`text-sm font-medium ${
-                          grade >= 70 ? 'text-green-600' : grade >= 50 ? 'text-yellow-600' : 'text-red-600'
+                      <div key={student.id} className="flex justify-between items-center p-2 bg-[#F9FAFB] rounded">
+                        <span className="text-sm font-inter text-[#111827]">{student.name}</span>
+                        <span className={`text-sm font-medium font-inter ${
+                          grade >= 14 ? 'text-[#22C55E]' : grade >= 10 ? 'text-[#FACC15]' : 'text-red-600'
                         }`}>
                           {grade || 'N/A'}
                         </span>
