@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,9 +6,9 @@ import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 const StudentDashboard = () => {
-  // For demo purposes, we'll use the first student's data
+  // For demo purposes, we'll use Marie Dubois's data (ID: '1')
   // In a real app, this would be based on the logged-in user's ID
-  const currentStudentId = '1'; // Jane Student's ID
+  const currentStudentId = '1'; // Marie Dubois's ID
   
   const { modules, grades, exams, getGradesByStudent, getModulesByFiliere, students } = useData();
   const { toast } = useToast();
@@ -17,30 +16,6 @@ const StudentDashboard = () => {
   const currentStudent = students.find(s => s.id === currentStudentId);
   const studentGrades = getGradesByStudent(currentStudentId);
   const studentModules = getModulesByFiliere(currentStudent?.filiereId || '1');
-
-  // Create grade objects with module information
-  const gradesWithModules = studentModules.map(module => {
-    const grade = studentGrades.find(g => g.moduleId === module.id);
-    return {
-      moduleId: module.id,
-      moduleName: module.name,
-      moduleCode: module.code,
-      grade: grade?.grade || 0,
-      status: grade?.status || 'en-attente'
-    };
-  });
-
-  // Get exams for student's modules
-  const studentExams = exams.filter(exam => 
-    studentModules.some(module => module.id === exam.moduleId)
-  ).map(exam => {
-    const module = modules.find(m => m.id === exam.moduleId);
-    return {
-      ...exam,
-      moduleName: module?.name || '',
-      moduleCode: module?.code || ''
-    };
-  });
 
   const downloadTranscript = () => {
     toast({
@@ -78,6 +53,30 @@ const StudentDashboard = () => {
     }
   };
 
+  // Create grade objects with module information
+  const gradesWithModules = studentModules.map(module => {
+    const grade = studentGrades.find(g => g.moduleId === module.id);
+    return {
+      moduleId: module.id,
+      moduleName: module.name,
+      moduleCode: module.code,
+      grade: grade?.grade || 0,
+      status: grade?.status || 'en-attente'
+    };
+  });
+
+  // Get exams for student's modules
+  const studentExams = exams.filter(exam => 
+    studentModules.some(module => module.id === exam.moduleId)
+  ).map(exam => {
+    const module = modules.find(m => m.id === exam.moduleId);
+    return {
+      ...exam,
+      moduleName: module?.name || '',
+      moduleCode: module?.code || ''
+    };
+  });
+
   const upcomingExams = studentExams.filter(e => e.status === 'a-venir');
   const completedExams = studentExams.filter(e => e.status === 'termine');
   const validGrades = gradesWithModules.filter(g => g.status !== 'en-attente');
@@ -87,7 +86,7 @@ const StudentDashboard = () => {
     <div className="space-y-6 bg-[#F9FAFB] min-h-screen p-6 font-inter">
       <div>
         <h1 className="text-2xl font-bold text-[#1E293B] font-inter uppercase">Tableau de Bord Étudiant</h1>
-        <p className="text-[#6B7280] font-inter">Consultez vos planning d'examens, résultats et progrès académique</p>
+        <p className="text-[#6B7280] font-inter">Bienvenue {currentStudent?.name || 'Étudiant'} - Consultez vos planning d'examens, résultats et progrès académique</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
