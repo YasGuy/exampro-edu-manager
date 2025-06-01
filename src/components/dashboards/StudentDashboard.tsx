@@ -18,16 +18,94 @@ const StudentDashboard = () => {
   const studentModules = getModulesByFiliere(currentStudent?.filiereId || '1');
 
   const downloadTranscript = () => {
+    // Create transcript content
+    const gradesWithModules = studentModules.map(module => {
+      const grade = studentGrades.find(g => g.moduleId === module.id);
+      return {
+        moduleId: module.id,
+        moduleName: module.name,
+        moduleCode: module.code,
+        grade: grade?.grade || 0,
+        status: grade?.status || 'en-attente'
+      };
+    });
+
+    const validGrades = gradesWithModules.filter(g => g.status !== 'en-attente');
+    const moyenne = validGrades.length > 0 ? validGrades.reduce((sum, g) => sum + g.grade, 0) / validGrades.length : 0;
+
+    const transcriptContent = `
+RELEVÉ DE NOTES
+================
+
+Étudiant: ${currentStudent?.name || 'Nom inconnu'}
+Email: ${currentStudent?.email || 'Email inconnu'}
+Date: ${new Date().toLocaleDateString('fr-FR')}
+
+NOTES PAR MODULE:
+${gradesWithModules.map(g => 
+  `${g.moduleCode} - ${g.moduleName}: ${g.status === 'en-attente' ? 'En Attente' : `${g.grade}/20 (${g.status.toUpperCase()})`}`
+).join('\n')}
+
+MOYENNE GÉNÉRALE: ${moyenne.toFixed(1)}/20
+MODULES RÉUSSIS: ${gradesWithModules.filter(g => g.status === 'admis').length}/${gradesWithModules.length}
+
+Document généré le ${new Date().toLocaleString('fr-FR')}
+    `.trim();
+
+    // Create and download file
+    const blob = new Blob([transcriptContent], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `releve_notes_${currentStudent?.name?.replace(/\s+/g, '_') || 'etudiant'}_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
     toast({
-      title: "Téléchargement Commencé",
-      description: "Votre relevé de notes est en cours de génération et sera téléchargé sous peu."
+      title: "Téléchargement Réussi",
+      description: "Votre relevé de notes a été téléchargé avec succès."
     });
   };
 
   const downloadCertificate = () => {
+    const certificateContent = `
+ATTESTATION DE SCOLARITÉ
+========================
+
+Je soussigné(e), certifie que :
+
+Nom de l'étudiant: ${currentStudent?.name || 'Nom inconnu'}
+Email: ${currentStudent?.email || 'Email inconnu'}
+Filière: Informatique
+
+Est régulièrement inscrit(e) et suit assidûment les cours pour l'année universitaire en cours.
+
+Cette attestation est délivrée pour servir et valoir ce que de droit.
+
+Fait le ${new Date().toLocaleDateString('fr-FR')}
+
+Le Directeur Académique
+ExamPro - Système de Gestion Éducative
+
+Document officiel généré électroniquement le ${new Date().toLocaleString('fr-FR')}
+    `.trim();
+
+    // Create and download file
+    const blob = new Blob([certificateContent], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `attestation_${currentStudent?.name?.replace(/\s+/g, '_') || 'etudiant'}_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
     toast({
-      title: "Téléchargement Commencé", 
-      description: "Votre attestation est en cours de génération et sera téléchargée sous peu."
+      title: "Téléchargement Réussi", 
+      description: "Votre attestation a été téléchargée avec succès."
     });
   };
 
@@ -53,7 +131,6 @@ const StudentDashboard = () => {
     }
   };
 
-  // Create grade objects with module information
   const gradesWithModules = studentModules.map(module => {
     const grade = studentGrades.find(g => g.moduleId === module.id);
     return {
@@ -65,7 +142,6 @@ const StudentDashboard = () => {
     };
   });
 
-  // Get exams for student's modules
   const studentExams = exams.filter(exam => 
     studentModules.some(module => module.id === exam.moduleId)
   ).map(exam => {
