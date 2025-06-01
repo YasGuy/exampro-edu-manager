@@ -27,10 +27,10 @@ const DEMO_USERS: User[] = [
   },
   {
     id: '4',
-    email: 'student@exampro.com',
+    email: 'marie@etudiant.com',
     password: 'student123',
     role: 'student',
-    name: 'Jane Student'
+    name: 'Marie Dubois'
   }
 ];
 

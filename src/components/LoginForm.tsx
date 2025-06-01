@@ -87,7 +87,7 @@ const LoginForm = () => {
           <p>Admin : admin@exampro.com / admin123</p>
           <p>Directeur : director@exampro.com / director123</p>
           <p>Enseignant : teacher@exampro.com / teacher123</p>
-          <p>Étudiant : student@exampro.com / student123</p>
+          <p>Étudiant : marie@etudiant.com / student123</p>
         </div>
       </div>
     </div>
