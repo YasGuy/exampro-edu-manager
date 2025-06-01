@@ -1,66 +1,45 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-
-interface Grade {
-  moduleId: string;
-  moduleName: string;
-  moduleCode: string;
-  grade: number;
-  status: 'admis' | 'non-admis' | 'en-attente';
-}
-
-interface Exam {
-  id: string;
-  moduleName: string;
-  moduleCode: string;
-  date: string;
-  time: string;
-  room: string;
-  status: 'a-venir' | 'termine';
-}
+import { useData } from '@/contexts/DataContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const StudentDashboard = () => {
-  const [grades] = useState<Grade[]>([
-    { moduleId: '1', moduleName: 'Structures de Données', moduleCode: 'INFO101', grade: 17, status: 'admis' },
-    { moduleId: '2', moduleName: 'Systèmes de Base de Données', moduleCode: 'INFO201', grade: 15.5, status: 'admis' },
-    { moduleId: '3', moduleName: 'Développement Web', moduleCode: 'INFO301', grade: 18.5, status: 'admis' },
-    { moduleId: '4', moduleName: 'Génie Logiciel', moduleCode: 'INFO401', grade: 0, status: 'en-attente' }
-  ]);
-
-  const [exams] = useState<Exam[]>([
-    { 
-      id: '1', 
-      moduleName: 'Génie Logiciel', 
-      moduleCode: 'INFO401', 
-      date: '2024-06-15', 
-      time: '09:00', 
-      room: 'Salle A101',
-      status: 'a-venir'
-    },
-    { 
-      id: '2', 
-      moduleName: 'Intelligence Artificielle', 
-      moduleCode: 'INFO501', 
-      date: '2024-06-18', 
-      time: '14:00', 
-      room: 'Salle B202',
-      status: 'a-venir'
-    },
-    { 
-      id: '3', 
-      moduleName: 'Structures de Données', 
-      moduleCode: 'INFO101', 
-      date: '2024-05-20', 
-      time: '10:00', 
-      room: 'Salle C301',
-      status: 'termine'
-    }
-  ]);
-
+  // For demo purposes, we'll use the first student's data
+  // In a real app, this would be based on the logged-in user's ID
+  const currentStudentId = '1'; // Jane Student's ID
+  
+  const { modules, grades, exams, getGradesByStudent, getModulesByFiliere, students } = useData();
   const { toast } = useToast();
+
+  const currentStudent = students.find(s => s.id === currentStudentId);
+  const studentGrades = getGradesByStudent(currentStudentId);
+  const studentModules = getModulesByFiliere(currentStudent?.filiereId || '1');
+
+  // Create grade objects with module information
+  const gradesWithModules = studentModules.map(module => {
+    const grade = studentGrades.find(g => g.moduleId === module.id);
+    return {
+      moduleId: module.id,
+      moduleName: module.name,
+      moduleCode: module.code,
+      grade: grade?.grade || 0,
+      status: grade?.status || 'en-attente'
+    };
+  });
+
+  // Get exams for student's modules
+  const studentExams = exams.filter(exam => 
+    studentModules.some(module => module.id === exam.moduleId)
+  ).map(exam => {
+    const module = modules.find(m => m.id === exam.moduleId);
+    return {
+      ...exam,
+      moduleName: module?.name || '',
+      moduleCode: module?.code || ''
+    };
+  });
 
   const downloadTranscript = () => {
     toast({
@@ -98,9 +77,9 @@ const StudentDashboard = () => {
     }
   };
 
-  const upcomingExams = exams.filter(e => e.status === 'a-venir');
-  const completedExams = exams.filter(e => e.status === 'termine');
-  const validGrades = grades.filter(g => g.status !== 'en-attente');
+  const upcomingExams = studentExams.filter(e => e.status === 'a-venir');
+  const completedExams = studentExams.filter(e => e.status === 'termine');
+  const validGrades = gradesWithModules.filter(g => g.status !== 'en-attente');
   const moyenne = validGrades.length > 0 ? validGrades.reduce((sum, g) => sum + g.grade, 0) / validGrades.length : 0;
 
   return (
@@ -123,11 +102,11 @@ const StudentDashboard = () => {
               </div>
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
-                  <p className="text-xl font-semibold text-[#111827] font-inter">{grades.filter(g => g.status === 'admis').length}</p>
+                  <p className="text-xl font-semibold text-[#111827] font-inter">{gradesWithModules.filter(g => g.status === 'admis').length}</p>
                   <p className="text-xs text-[#6B7280] font-inter">Admis</p>
                 </div>
                 <div>
-                  <p className="text-xl font-semibold text-[#111827] font-inter">{grades.filter(g => g.status === 'en-attente').length}</p>
+                  <p className="text-xl font-semibold text-[#111827] font-inter">{gradesWithModules.filter(g => g.status === 'en-attente').length}</p>
                   <p className="text-xs text-[#6B7280] font-inter">En Attente</p>
                 </div>
               </div>
@@ -176,7 +155,7 @@ const StudentDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {grades.map(grade => (
+              {gradesWithModules.map(grade => (
                 <div key={grade.moduleId} className="flex items-center justify-between p-3 border rounded-lg bg-[#F9FAFB]">
                   <div>
                     <h4 className="font-medium text-[#111827] font-inter">{grade.moduleName}</h4>
@@ -249,11 +228,11 @@ const StudentDashboard = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-[#22C55E]/10 rounded-lg">
-              <p className="text-2xl font-bold text-[#22C55E] font-inter">{grades.length}</p>
+              <p className="text-2xl font-bold text-[#22C55E] font-inter">{gradesWithModules.length}</p>
               <p className="text-sm text-[#6B7280] font-inter">Total Modules</p>
             </div>
             <div className="text-center p-4 bg-[#22C55E]/10 rounded-lg">
-              <p className="text-2xl font-bold text-[#22C55E] font-inter">{grades.filter(g => g.status === 'admis').length}</p>
+              <p className="text-2xl font-bold text-[#22C55E] font-inter">{gradesWithModules.filter(g => g.status === 'admis').length}</p>
               <p className="text-sm text-[#6B7280] font-inter">Modules Réussis</p>
             </div>
             <div className="text-center p-4 bg-[#FACC15]/10 rounded-lg">
@@ -266,7 +245,7 @@ const StudentDashboard = () => {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </div>
     </div>
   );
 };
