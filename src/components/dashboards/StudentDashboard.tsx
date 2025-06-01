@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
+import jsPDF from 'jspdf';
 
 const StudentDashboard = () => {
   // For demo purposes, we'll use Marie Dubois's data (ID: '1')
@@ -33,79 +34,86 @@ const StudentDashboard = () => {
     const validGrades = gradesWithModules.filter(g => g.status !== 'en-attente');
     const moyenne = validGrades.length > 0 ? validGrades.reduce((sum, g) => sum + g.grade, 0) / validGrades.length : 0;
 
-    const transcriptContent = `
-RELEVÉ DE NOTES
-================
+    // Create PDF
+    const pdf = new jsPDF();
+    
+    // Title
+    pdf.setFontSize(18);
+    pdf.text('RELEVÉ DE NOTES', 20, 20);
+    
+    // Student info
+    pdf.setFontSize(12);
+    pdf.text(`Étudiant: ${currentStudent?.name || 'Nom inconnu'}`, 20, 40);
+    pdf.text(`Email: ${currentStudent?.email || 'Email inconnu'}`, 20, 50);
+    pdf.text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, 20, 60);
+    
+    // Grades section
+    pdf.setFontSize(14);
+    pdf.text('NOTES PAR MODULE:', 20, 80);
+    
+    let yPosition = 95;
+    pdf.setFontSize(10);
+    gradesWithModules.forEach(g => {
+      const gradeText = g.status === 'en-attente' ? 'En Attente' : `${g.grade}/20 (${g.status.toUpperCase()})`;
+      pdf.text(`${g.moduleCode} - ${g.moduleName}: ${gradeText}`, 20, yPosition);
+      yPosition += 10;
+    });
+    
+    // Summary
+    yPosition += 10;
+    pdf.setFontSize(12);
+    pdf.text(`MOYENNE GÉNÉRALE: ${moyenne.toFixed(1)}/20`, 20, yPosition);
+    pdf.text(`MODULES RÉUSSIS: ${gradesWithModules.filter(g => g.status === 'admis').length}/${gradesWithModules.length}`, 20, yPosition + 15);
+    
+    // Footer
+    pdf.setFontSize(8);
+    pdf.text(`Document généré le ${new Date().toLocaleString('fr-FR')}`, 20, 280);
 
-Étudiant: ${currentStudent?.name || 'Nom inconnu'}
-Email: ${currentStudent?.email || 'Email inconnu'}
-Date: ${new Date().toLocaleDateString('fr-FR')}
-
-NOTES PAR MODULE:
-${gradesWithModules.map(g => 
-  `${g.moduleCode} - ${g.moduleName}: ${g.status === 'en-attente' ? 'En Attente' : `${g.grade}/20 (${g.status.toUpperCase()})`}`
-).join('\n')}
-
-MOYENNE GÉNÉRALE: ${moyenne.toFixed(1)}/20
-MODULES RÉUSSIS: ${gradesWithModules.filter(g => g.status === 'admis').length}/${gradesWithModules.length}
-
-Document généré le ${new Date().toLocaleString('fr-FR')}
-    `.trim();
-
-    // Create and download file
-    const blob = new Blob([transcriptContent], { type: 'text/plain;charset=utf-8' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `releve_notes_${currentStudent?.name?.replace(/\s+/g, '_') || 'etudiant'}_${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    // Download PDF
+    pdf.save(`releve_notes_${currentStudent?.name?.replace(/\s+/g, '_') || 'etudiant'}_${new Date().toISOString().split('T')[0]}.pdf`);
 
     toast({
       title: "Téléchargement Réussi",
-      description: "Votre relevé de notes a été téléchargé avec succès."
+      description: "Votre relevé de notes PDF a été téléchargé avec succès."
     });
   };
 
   const downloadCertificate = () => {
-    const certificateContent = `
-ATTESTATION DE SCOLARITÉ
-========================
+    // Create PDF
+    const pdf = new jsPDF();
+    
+    // Title
+    pdf.setFontSize(18);
+    pdf.text('ATTESTATION DE SCOLARITÉ', 20, 30);
+    
+    // Content
+    pdf.setFontSize(12);
+    pdf.text('Je soussigné(e), certifie que :', 20, 60);
+    
+    pdf.text(`Nom de l'étudiant: ${currentStudent?.name || 'Nom inconnu'}`, 20, 80);
+    pdf.text(`Email: ${currentStudent?.email || 'Email inconnu'}`, 20, 95);
+    pdf.text('Filière: Informatique', 20, 110);
+    
+    pdf.text('Est régulièrement inscrit(e) et suit assidûment les cours', 20, 130);
+    pdf.text('pour l\'année universitaire en cours.', 20, 145);
+    
+    pdf.text('Cette attestation est délivrée pour servir et valoir ce que de droit.', 20, 165);
+    
+    pdf.text(`Fait le ${new Date().toLocaleDateString('fr-FR')}`, 20, 190);
+    
+    pdf.text('Le Directeur Académique', 20, 210);
+    pdf.text('ExamPro - Système de Gestion Éducative', 20, 225);
+    
+    // Footer
+    pdf.setFontSize(8);
+    pdf.text(`Document officiel généré électroniquement le ${new Date().toLocaleString('fr-FR')}`, 20, 280);
 
-Je soussigné(e), certifie que :
-
-Nom de l'étudiant: ${currentStudent?.name || 'Nom inconnu'}
-Email: ${currentStudent?.email || 'Email inconnu'}
-Filière: Informatique
-
-Est régulièrement inscrit(e) et suit assidûment les cours pour l'année universitaire en cours.
-
-Cette attestation est délivrée pour servir et valoir ce que de droit.
-
-Fait le ${new Date().toLocaleDateString('fr-FR')}
-
-Le Directeur Académique
-ExamPro - Système de Gestion Éducative
-
-Document officiel généré électroniquement le ${new Date().toLocaleString('fr-FR')}
-    `.trim();
-
-    // Create and download file
-    const blob = new Blob([certificateContent], { type: 'text/plain;charset=utf-8' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `attestation_${currentStudent?.name?.replace(/\s+/g, '_') || 'etudiant'}_${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    // Download PDF
+    pdf.save(`attestation_${currentStudent?.name?.replace(/\s+/g, '_') || 'etudiant'}_${new Date().toISOString().split('T')[0]}.pdf`);
 
     toast({
       title: "Téléchargement Réussi", 
-      description: "Votre attestation a été téléchargée avec succès."
+      description: "Votre attestation PDF a été téléchargée avec succès."
     });
   };
 
