@@ -84,10 +84,10 @@ const LoginForm = () => {
 
         <div className="mt-6 text-xs text-[#6B7280] space-y-1 font-inter">
           <p><strong>Comptes de Démonstration :</strong></p>
-          <p>Admin : admin@exampro.com / admin123</p>
-          <p>Directeur : director@exampro.com / director123</p>
-          <p>Enseignant : teacher@exampro.com / teacher123</p>
-          <p>Étudiant : marie@etudiant.com / student123</p>
+          <p>Admin : admin@exampro.com / AdminSecure2024!</p>
+          <p>Directeur : director@exampro.com / DirectorPass2024!</p>
+          <p>Enseignant : teacher@exampro.com / TeacherKey2024!</p>
+          <p>Étudiant : marie@etudiant.com / StudentAccess2024!</p>
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import ChangePasswordForm from '../ChangePasswordForm';
+import AdminChangeUserPasswordForm from '../AdminChangeUserPasswordForm';
 import ExamCalendar from '../ExamCalendar';
 
 interface User {
@@ -118,7 +118,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        <ChangePasswordForm />
+        <AdminChangeUserPasswordForm />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
