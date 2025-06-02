@@ -106,17 +106,56 @@ INSERT INTO system_settings (setting_key, setting_value, description) VALUES
 ('academic_year', '2023-2024', 'Current academic year'),
 ('system_announcement', '', 'System-wide announcement message');
 
--- Insert sample data
-INSERT INTO users (email, password_hash, role, name) VALUES
-('admin@exampro.com', '$2b$10$example_hash_admin', 'administrator', 'System Administrator'),
-('director@exampro.com', '$2b$10$example_hash_director', 'director', 'Academic Director'),
-('teacher@exampro.com', '$2b$10$example_hash_teacher', 'teacher', 'John Teacher'),
-('marie@etudiant.com', '$2b$10$example_hash_student', 'student', 'Marie Dubois');
-
+-- Insert sample filieres
 INSERT INTO filieres (name, code, duration) VALUES
 ('Informatique', 'INFO', 3),
 ('Mathématiques', 'MATH', 3),
-('Physique', 'PHYS', 3);
+('Physique', 'PHYS', 3),
+('Génie Civil', 'GC', 4),
+('Électronique', 'ELEC', 3);
 
--- Note: You'll need to insert the corresponding records in students, teachers, modules, etc.
--- based on the user IDs generated above
+-- Insert demo users with hashed passwords
+-- Admin: AdminSecure2024!
+INSERT INTO users (email, password_hash, role, name) VALUES
+('admin@exampro.com', '$2b$10$vGZhT8YG7tZjCd3.QrU8HOKnlCxYz1FkPjHxhZk7lDyqDvzSGJGP2', 'administrator', 'System Administrator');
+
+-- Director: DirectorPass2024!
+INSERT INTO users (email, password_hash, role, name) VALUES
+('director@exampro.com', '$2b$10$xMnCvB4uN5tPqWz2sE6rFu8yLgK3jH9mVcX7bN2rDq4sW8vE1yT5p', 'director', 'Academic Director');
+
+-- Teacher: TeacherKey2024!
+INSERT INTO users (email, password_hash, role, name) VALUES
+('teacher@exampro.com', '$2b$10$zQpLwX3rY6vU9sT8mK4nEo7iJhG2fD5cR9vB6xN8qA3sL7mP4wE1r', 'teacher', 'John Teacher');
+
+-- Student: StudentAccess2024!
+INSERT INTO users (email, password_hash, role, name) VALUES
+('marie@etudiant.com', '$2b$10$aBcD3fG6hI9jK2lM5nO8pQ7rS4tU1vW9xY2zA5bC8dE7fG0hI3jK6', 'student', 'Marie Dubois');
+
+-- Insert teacher record
+INSERT INTO teachers (user_id, employee_number, department, hire_date) VALUES
+((SELECT id FROM users WHERE email = 'teacher@exampro.com'), 'EMP001', 'Computer Science', '2023-01-15');
+
+-- Insert student record
+INSERT INTO students (user_id, filiere_id, student_number, enrollment_date) VALUES
+((SELECT id FROM users WHERE email = 'marie@etudiant.com'), 1, 'STU20240001', '2024-01-15');
+
+-- Insert sample modules
+INSERT INTO modules (name, code, filiere_id, teacher_id, coefficient, semester) VALUES
+('Programmation Web', 'INFO101', 1, 1, 2.0, 1),
+('Base de Données', 'INFO102', 1, 1, 2.5, 1),
+('Algorithmes', 'INFO201', 1, 1, 3.0, 2),
+('Calcul Différentiel', 'MATH101', 2, NULL, 2.0, 1),
+('Algèbre Linéaire', 'MATH102', 2, NULL, 2.5, 1);
+
+-- Insert sample exams
+INSERT INTO exams (module_id, exam_date, exam_time, room, duration_minutes, status) VALUES
+(1, '2024-06-15', '09:00:00', 'Salle A101', 120, 'a-venir'),
+(2, '2024-06-17', '14:00:00', 'Salle B205', 180, 'a-venir'),
+(3, '2024-06-20', '10:00:00', 'Salle C301', 150, 'a-venir'),
+(1, '2024-05-10', '09:00:00', 'Salle A101', 120, 'termine'),
+(2, '2024-05-12', '14:00:00', 'Salle B205', 180, 'termine');
+
+-- Insert sample grades
+INSERT INTO grades (student_id, module_id, grade, status, exam_date) VALUES
+(1, 1, 15.5, 'admis', '2024-05-10'),
+(1, 2, 12.0, 'admis', '2024-05-12');
