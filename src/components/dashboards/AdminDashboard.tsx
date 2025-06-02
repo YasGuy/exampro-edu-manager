@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import ChangePasswordForm from '../ChangePasswordForm';
+import ExamCalendar from '../ExamCalendar';
 
 interface User {
   id: string;
@@ -117,6 +118,10 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
+        <ChangePasswordForm />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-white border-gray-200">
           <CardHeader>
             <CardTitle className="text-[#1E293B] font-inter font-semibold">Paramètres Système</CardTitle>
@@ -145,6 +150,8 @@ const AdminDashboard = () => {
             </Button>
           </CardContent>
         </Card>
+
+        <ExamCalendar />
       </div>
 
       <Card className="bg-white border-gray-200">
