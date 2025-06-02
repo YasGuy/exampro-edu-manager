@@ -7,28 +7,28 @@ const DEMO_USERS: User[] = [
   {
     id: '1',
     email: 'admin@exampro.com',
-    password: 'admin123',
+    password: 'AdminSecure2024!',
     role: 'administrator',
     name: 'System Administrator'
   },
   {
     id: '2',
     email: 'director@exampro.com',
-    password: 'director123',
+    password: 'DirectorPass2024!',
     role: 'director',
     name: 'Academic Director'
   },
   {
     id: '3',
     email: 'teacher@exampro.com',
-    password: 'teacher123',
+    password: 'TeacherKey2024!',
     role: 'teacher',
     name: 'John Teacher'
   },
   {
     id: '4',
     email: 'marie@etudiant.com',
-    password: 'student123',
+    password: 'StudentAccess2024!',
     role: 'student',
     name: 'Marie Dubois'
   }
