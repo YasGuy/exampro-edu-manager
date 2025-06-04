@@ -19,6 +19,7 @@ app.use(express.json());
 // Database connection
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 3306, // Default MySQL port
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'exampro_db'
@@ -28,12 +29,21 @@ let db;
 
 async function initDatabase() {
     try {
+        // First connect without specifying database
+        const tempConnection = await mysql.createConnection({
+            host: dbConfig.host,
+            port: dbConfig.port,
+            user: dbConfig.user,
+            password: dbConfig.password
+        });
+        
+        // Create database if it doesn't exist using query instead of execute
+        await tempConnection.query(`CREATE DATABASE IF NOT EXISTS ${dbConfig.database}`);
+        await tempConnection.end();
+        
+        // Now connect to the specific database
         db = await mysql.createConnection(dbConfig);
         console.log('Connected to MySQL database');
-        
-        // Create database if it doesn't exist
-        await db.execute(`CREATE DATABASE IF NOT EXISTS ${dbConfig.database}`);
-        await db.execute(`USE ${dbConfig.database}`);
         
     } catch (error) {
         console.error('Database connection failed:', error);
