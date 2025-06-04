@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,26 +31,131 @@ const AdminDashboard = () => {
   
   const { toast } = useToast();
 
-  const handleAddUser = (e: React.FormEvent) => {
+  const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user: User = {
-      id: Date.now().toString(),
-      ...newUser
-    };
-    setUsers([...users, user]);
-    setNewUser({ name: '', email: '', role: 'student' });
-    toast({
-      title: "Utilisateur Ajouté",
-      description: `${user.name} a été ajouté avec succès.`
-    });
+    
+    console.log('Attempting to add user:', newUser);
+    
+    try {
+      // Get the auth token from localStorage
+      const authData = localStorage.getItem('auth');
+      let token = null;
+      
+      if (authData) {
+        const parsed = JSON.parse(authData);
+        token = parsed.token;
+      }
+      
+      console.log('Auth token:', token ? 'Found' : 'Not found');
+      
+      if (!token) {
+        toast({
+          title: "Erreur",
+          description: "Vous devez être connecté pour effectuer cette action.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const response = await fetch('http://localhost:3001/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role
+        })
+      });
+
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (response.ok) {
+        // Add to local state for immediate UI update
+        const user: User = {
+          id: data.id?.toString() || Date.now().toString(),
+          ...newUser
+        };
+        setUsers([...users, user]);
+        setNewUser({ name: '', email: '', role: 'student' });
+        
+        toast({
+          title: "Utilisateur Ajouté",
+          description: `${user.name} a été ajouté avec succès. Mot de passe par défaut: ${data.defaultPassword || 'temp123456'}`
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: data.error || "Erreur lors de l'ajout de l'utilisateur",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error adding user:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur de connexion au serveur",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleDeleteUser = (id: string) => {
-    setUsers(users.filter(u => u.id !== id));
-    toast({
-      title: "Utilisateur Supprimé",
-      description: "L'utilisateur a été retiré du système."
-    });
+  const handleDeleteUser = async (id: string) => {
+    console.log('Attempting to delete user:', id);
+    
+    try {
+      const authData = localStorage.getItem('auth');
+      let token = null;
+      
+      if (authData) {
+        const parsed = JSON.parse(authData);
+        token = parsed.token;
+      }
+      
+      if (!token) {
+        toast({
+          title: "Erreur",
+          description: "Vous devez être connecté pour effectuer cette action.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const response = await fetch(`http://localhost:3001/api/admin/users/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('Delete response status:', response.status);
+
+      if (response.ok) {
+        setUsers(users.filter(u => u.id !== id));
+        toast({
+          title: "Utilisateur Supprimé",
+          description: "L'utilisateur a été retiré du système."
+        });
+      } else {
+        const data = await response.json();
+        toast({
+          title: "Erreur",
+          description: data.error || "Erreur lors de la suppression",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur de connexion au serveur",
+        variant: "destructive"
+      });
+    }
   };
 
   const getRoleLabel = (role: string) => {
