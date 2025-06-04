@@ -84,6 +84,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const generateDemoToken = (user: User): string => {
+    // Generate a demo JWT-like token for frontend-only demo mode
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const payload = btoa(JSON.stringify({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
+    }));
+    const signature = btoa('demo-signature');
+    return `${header}.${payload}.${signature}`;
+  };
+
   const tryDemoLogin = (email: string, password: string): boolean => {
     const DEMO_USERS: User[] = [
       {
@@ -122,12 +136,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Demo user found:', foundUser);
       setUser(foundUser);
       
-      // Store demo auth data
+      // Generate and store demo auth data with proper token
+      const demoToken = generateDemoToken(foundUser);
       const authData = {
         user: foundUser,
-        token: 'demo-token'
+        token: demoToken
       };
       localStorage.setItem('auth', JSON.stringify(authData));
+      console.log('Demo token generated and stored:', demoToken);
       
       return true;
     }
