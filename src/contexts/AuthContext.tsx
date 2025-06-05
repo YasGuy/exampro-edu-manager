@@ -70,85 +70,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         const errorData = await response.json();
         console.error('Login failed:', errorData);
-        
-        // Try demo users as fallback
-        console.log('Falling back to demo users...');
-        return tryDemoLogin(email, password);
+        return false;
       }
     } catch (error) {
       console.error('Login error:', error);
-      
-      // Fallback to demo users for development
-      console.log('Network error, falling back to demo users...');
-      return tryDemoLogin(email, password);
+      return false;
     }
-  };
-
-  const generateDemoToken = (user: User): string => {
-    // Generate a demo JWT-like token for frontend-only demo mode
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const payload = btoa(JSON.stringify({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
-    }));
-    const signature = btoa('demo-signature');
-    return `${header}.${payload}.${signature}`;
-  };
-
-  const tryDemoLogin = (email: string, password: string): boolean => {
-    const DEMO_USERS: User[] = [
-      {
-        id: '1',
-        email: 'admin@exampro.com',
-        password: 'AdminSecure2024!',
-        role: 'administrator',
-        name: 'System Administrator'
-      },
-      {
-        id: '2',
-        email: 'director@exampro.com',
-        password: 'DirectorPass2024!',
-        role: 'director',
-        name: 'Academic Director'
-      },
-      {
-        id: '3',
-        email: 'teacher@exampro.com',
-        password: 'TeacherKey2024!',
-        role: 'teacher',
-        name: 'John Teacher'
-      },
-      {
-        id: '4',
-        email: 'marie@etudiant.com',
-        password: 'StudentAccess2024!',
-        role: 'student',
-        name: 'Marie Dubois'
-      }
-    ];
-
-    console.log('Trying demo login for:', email);
-    const foundUser = DEMO_USERS.find(u => u.email === email && u.password === password);
-    if (foundUser) {
-      console.log('Demo user found:', foundUser);
-      setUser(foundUser);
-      
-      // Generate and store demo auth data with proper token
-      const demoToken = generateDemoToken(foundUser);
-      const authData = {
-        user: foundUser,
-        token: demoToken
-      };
-      localStorage.setItem('auth', JSON.stringify(authData));
-      console.log('Demo token generated and stored:', demoToken);
-      
-      return true;
-    }
-    console.log('No demo user found for credentials');
-    return false;
   };
 
   const logout = () => {

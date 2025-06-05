@@ -20,11 +20,7 @@ interface User {
 const AdminDashboard = () => {
   const { refreshData } = useData();
   
-  const [users, setUsers] = useState<User[]>([
-    { id: '1', name: 'Directeur Académique', email: 'director@exampro.com', role: 'director' },
-    { id: '2', name: 'Jean Enseignant', email: 'teacher@exampro.com', role: 'teacher' },
-    { id: '3', name: 'Marie Étudiante', email: 'student@exampro.com', role: 'student' },
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
   
   const [newUser, setNewUser] = useState({
     name: '',
@@ -81,23 +77,6 @@ const AdminDashboard = () => {
 
       console.log('Add user response status:', response.status);
       
-      if (response.status === 401 || response.status === 403) {
-        console.log('Authentication failed, trying demo mode...');
-        // Handle demo mode - add user locally
-        const user: User = {
-          id: Date.now().toString(),
-          ...newUser
-        };
-        setUsers([...users, user]);
-        setNewUser({ name: '', email: '', role: 'student' });
-        
-        toast({
-          title: "Utilisateur Ajouté (Mode Démo)",
-          description: `${user.name} a été ajouté localement. Mot de passe par défaut: temp123456`
-        });
-        return;
-      }
-
       const data = await response.json();
       console.log('Add user response data:', data);
 
@@ -128,19 +107,10 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.error('Error adding user:', error);
-      
-      // Fallback to demo mode on network error
-      console.log('Network error, adding user in demo mode...');
-      const user: User = {
-        id: Date.now().toString(),
-        ...newUser
-      };
-      setUsers([...users, user]);
-      setNewUser({ name: '', email: '', role: 'student' });
-      
       toast({
-        title: "Utilisateur Ajouté (Mode Démo)",
-        description: `${user.name} a été ajouté localement en raison d'une erreur de connexion.`
+        title: "Erreur",
+        description: "Erreur de connexion au serveur",
+        variant: "destructive"
       });
     }
   };
@@ -169,17 +139,6 @@ const AdminDashboard = () => {
 
       console.log('Delete response status:', response.status);
 
-      if (response.status === 401 || response.status === 403) {
-        console.log('Authentication failed, trying demo mode...');
-        // Handle demo mode - delete user locally
-        setUsers(users.filter(u => u.id !== id));
-        toast({
-          title: "Utilisateur Supprimé (Mode Démo)",
-          description: "L'utilisateur a été retiré localement."
-        });
-        return;
-      }
-
       if (response.ok) {
         setUsers(users.filter(u => u.id !== id));
         // Refresh data context to get updated students
@@ -198,13 +157,10 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.error('Error deleting user:', error);
-      
-      // Fallback to demo mode on network error
-      console.log('Network error, deleting user in demo mode...');
-      setUsers(users.filter(u => u.id !== id));
       toast({
-        title: "Utilisateur Supprimé (Mode Démo)",
-        description: "L'utilisateur a été retiré localement en raison d'une erreur de connexion."
+        title: "Erreur",
+        description: "Erreur de connexion au serveur",
+        variant: "destructive"
       });
     }
   };
