@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 export interface Student {
   id: string;
@@ -55,6 +54,8 @@ interface DataContextType {
   filieres: Filiere[];
   grades: Grade[];
   exams: Exam[];
+  loading: boolean;
+  refreshData: () => Promise<void>;
   addStudent: (student: Omit<Student, 'id'>) => void;
   updateStudent: (id: string, student: Partial<Student>) => void;
   deleteStudent: (id: string) => void;
@@ -90,48 +91,175 @@ export const useData = () => {
 };
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [filieres, setFilieres] = useState<Filiere[]>([
-    { id: '1', name: 'Informatique', code: 'INFO', duration: 3 },
-    { id: '2', name: 'Mathématiques', code: 'MATH', duration: 3 },
-    { id: '3', name: 'Physique', code: 'PHYS', duration: 3 }
-  ]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [filieres, setFilieres] = useState<Filiere[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [students, setStudents] = useState<Student[]>([
-    { id: '1', name: 'Marie Dubois', email: 'marie@etudiant.com', filiereId: '1' },
-    { id: '2', name: 'Pierre Martin', email: 'pierre@etudiant.com', filiereId: '1' },
-    { id: '3', name: 'Sophie Laurent', email: 'sophie@etudiant.com', filiereId: '2' },
-    { id: '4', name: 'Ahmed Benali', email: 'ahmed@etudiant.com', filiereId: '1' }
-  ]);
+  const getAuthToken = (): string | null => {
+    try {
+      const authData = localStorage.getItem('auth');
+      if (authData) {
+        const parsed = JSON.parse(authData);
+        return parsed.token;
+      }
+    } catch (error) {
+      console.error('Error retrieving auth token:', error);
+    }
+    return null;
+  };
 
-  const [teachers, setTeachers] = useState<Teacher[]>([
-    { id: '1', name: 'Dr. Hassan Alami', email: 'hassan@prof.com', moduleIds: ['1', '2'] },
-    { id: '2', name: 'Prof. Fatima Zahra', email: 'fatima@prof.com', moduleIds: ['3', '4'] },
-    { id: '3', name: 'Dr. Mohamed Tazi', email: 'mohamed@prof.com', moduleIds: ['5'] }
-  ]);
+  const fetchFromAPI = async (endpoint: string) => {
+    const token = getAuthToken();
+    try {
+      const response = await fetch(`http://localhost:3001/api${endpoint}`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        console.log(`API error for ${endpoint}:`, response.status);
+        return null;
+      }
+    } catch (error) {
+      console.error(`Network error for ${endpoint}:`, error);
+      return null;
+    }
+  };
 
-  const [modules, setModules] = useState<Module[]>([
-    { id: '1', name: 'Structures de Données', code: 'INFO101', filiereId: '1', teacherId: '1', coefficient: 3 },
-    { id: '2', name: 'Systèmes de Base de Données', code: 'INFO201', filiereId: '1', teacherId: '1', coefficient: 4 },
-    { id: '3', name: 'Développement Web', code: 'INFO301', filiereId: '1', teacherId: '2', coefficient: 3 },
-    { id: '4', name: 'Génie Logiciel', code: 'INFO401', filiereId: '1', teacherId: '2', coefficient: 4 },
-    { id: '5', name: 'Algèbre Linéaire', code: 'MATH101', filiereId: '2', teacherId: '3', coefficient: 4 }
-  ]);
+  const refreshData = async () => {
+    setLoading(true);
+    console.log('Fetching data from backend...');
 
-  const [grades, setGrades] = useState<Grade[]>([
-    { id: '1', studentId: '1', moduleId: '1', grade: 17, status: 'admis' },
-    { id: '2', studentId: '1', moduleId: '2', grade: 15.5, status: 'admis' },
-    { id: '3', studentId: '1', moduleId: '3', grade: 18.5, status: 'admis' },
-    { id: '4', studentId: '1', moduleId: '4', grade: 0, status: 'en-attente' },
-    { id: '5', studentId: '2', moduleId: '1', grade: 14, status: 'admis' },
-    { id: '6', studentId: '2', moduleId: '2', grade: 12.5, status: 'admis' },
-    { id: '7', studentId: '4', moduleId: '1', grade: 16, status: 'admis' }
-  ]);
+    try {
+      // Fetch all data from backend
+      const [studentsData, teachersData, modulesData, filieresData, gradesData, examsData] = await Promise.all([
+        fetchFromAPI('/students'),
+        fetchFromAPI('/teachers'),
+        fetchFromAPI('/modules'),
+        fetchFromAPI('/filieres'),
+        fetchFromAPI('/grades'),
+        fetchFromAPI('/exams')
+      ]);
 
-  const [exams, setExams] = useState<Exam[]>([
-    { id: '1', moduleId: '4', date: '2024-06-15', time: '09:00', room: 'Salle A101', status: 'a-venir' },
-    { id: '2', moduleId: '5', date: '2024-06-18', time: '14:00', room: 'Salle B202', status: 'a-venir' },
-    { id: '3', moduleId: '1', date: '2024-05-20', time: '10:00', room: 'Salle C301', status: 'termine' }
-  ]);
+      // Use backend data if available, otherwise use demo data
+      if (studentsData) {
+        setStudents(studentsData.map((s: any) => ({
+          id: s.id?.toString() || s.student_id?.toString(),
+          name: s.name || s.student_name,
+          email: s.email,
+          filiereId: s.filiere_id?.toString()
+        })));
+      } else {
+        setStudents([
+          { id: '1', name: 'Marie Dubois', email: 'marie@etudiant.com', filiereId: '1' },
+          { id: '2', name: 'Pierre Martin', email: 'pierre@etudiant.com', filiereId: '1' },
+          { id: '3', name: 'Sophie Laurent', email: 'sophie@etudiant.com', filiereId: '2' },
+          { id: '4', name: 'Ahmed Benali', email: 'ahmed@etudiant.com', filiereId: '1' }
+        ]);
+      }
+
+      if (teachersData) {
+        setTeachers(teachersData.map((t: any) => ({
+          id: t.id?.toString(),
+          name: t.name,
+          email: t.email,
+          moduleIds: [] // Will be populated from modules data
+        })));
+      } else {
+        setTeachers([
+          { id: '1', name: 'Dr. Hassan Alami', email: 'hassan@prof.com', moduleIds: ['1', '2'] },
+          { id: '2', name: 'Prof. Fatima Zahra', email: 'fatima@prof.com', moduleIds: ['3', '4'] },
+          { id: '3', name: 'Dr. Mohamed Tazi', email: 'mohamed@prof.com', moduleIds: ['5'] }
+        ]);
+      }
+
+      if (filieresData) {
+        setFilieres(filieresData.map((f: any) => ({
+          id: f.id?.toString(),
+          name: f.name,
+          code: f.code,
+          duration: f.duration || 3
+        })));
+      } else {
+        setFilieres([
+          { id: '1', name: 'Informatique', code: 'INFO', duration: 3 },
+          { id: '2', name: 'Mathématiques', code: 'MATH', duration: 3 },
+          { id: '3', name: 'Physique', code: 'PHYS', duration: 3 }
+        ]);
+      }
+
+      if (modulesData) {
+        setModules(modulesData.map((m: any) => ({
+          id: m.id?.toString(),
+          name: m.name,
+          code: m.code,
+          filiereId: m.filiere_id?.toString(),
+          teacherId: m.teacher_id?.toString() || '',
+          coefficient: m.coefficient || 1
+        })));
+      } else {
+        setModules([
+          { id: '1', name: 'Structures de Données', code: 'INFO101', filiereId: '1', teacherId: '1', coefficient: 3 },
+          { id: '2', name: 'Systèmes de Base de Données', code: 'INFO201', filiereId: '1', teacherId: '1', coefficient: 4 },
+          { id: '3', name: 'Développement Web', code: 'INFO301', filiereId: '1', teacherId: '2', coefficient: 3 },
+          { id: '4', name: 'Génie Logiciel', code: 'INFO401', filiereId: '1', teacherId: '2', coefficient: 4 },
+          { id: '5', name: 'Algèbre Linéaire', code: 'MATH101', filiereId: '2', teacherId: '3', coefficient: 4 }
+        ]);
+      }
+
+      if (gradesData) {
+        setGrades(gradesData.map((g: any) => ({
+          id: g.id?.toString(),
+          studentId: g.student_id?.toString(),
+          moduleId: g.module_id?.toString(),
+          grade: g.grade,
+          status: g.status
+        })));
+      } else {
+        setGrades([
+          { id: '1', studentId: '1', moduleId: '1', grade: 17, status: 'admis' },
+          { id: '2', studentId: '1', moduleId: '2', grade: 15.5, status: 'admis' },
+          { id: '3', studentId: '1', moduleId: '3', grade: 18.5, status: 'admis' },
+          { id: '4', studentId: '1', moduleId: '4', grade: 0, status: 'en-attente' },
+          { id: '5', studentId: '2', moduleId: '1', grade: 14, status: 'admis' },
+          { id: '6', studentId: '2', moduleId: '2', grade: 12.5, status: 'admis' },
+          { id: '7', studentId: '4', moduleId: '1', grade: 16, status: 'admis' }
+        ]);
+      }
+
+      if (examsData) {
+        setExams(examsData.map((e: any) => ({
+          id: e.id?.toString(),
+          moduleId: e.module_id?.toString(),
+          date: e.exam_date,
+          time: e.exam_time,
+          room: e.room,
+          status: new Date(e.exam_date) > new Date() ? 'a-venir' : 'termine'
+        })));
+      } else {
+        setExams([
+          { id: '1', moduleId: '4', date: '2024-06-15', time: '09:00', room: 'Salle A101', status: 'a-venir' },
+          { id: '2', moduleId: '5', date: '2024-06-18', time: '14:00', room: 'Salle B202', status: 'a-venir' },
+          { id: '3', moduleId: '1', date: '2024-05-20', time: '10:00', room: 'Salle C301', status: 'termine' }
+        ]);
+      }
+
+      console.log('Data loaded successfully from backend/demo');
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshData();
+  }, []);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -254,6 +382,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       filieres,
       grades,
       exams,
+      loading,
+      refreshData,
       addStudent,
       updateStudent,
       deleteStudent,
