@@ -15,10 +15,8 @@ function App() {
         <Router>
           <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
             <Routes>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Index />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
+              <Route path="/" element={<Layout><Index /></Layout>} />
+              <Route path="*" element={<Layout><NotFound /></Layout>} />
             </Routes>
             <Toaster />
           </div>
