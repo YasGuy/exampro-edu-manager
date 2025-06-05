@@ -18,7 +18,7 @@ interface User {
 }
 
 const AdminDashboard = () => {
-  const { students, refreshData } = useData();
+  const { refreshData } = useData();
   
   const [users, setUsers] = useState<User[]>([
     { id: '1', name: 'Directeur Académique', email: 'director@exampro.com', role: 'director' },
@@ -345,37 +345,6 @@ const AdminDashboard = () => {
                         Supprimer
                       </Button>
                     </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-white border-gray-200">
-        <CardHeader>
-          <CardTitle className="text-[#1E293B] font-inter font-semibold">Étudiants de la Base de Données</CardTitle>
-          <CardDescription className="text-[#6B7280] font-inter">Données en temps réel de la base de données</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-[#1E293B]">
-                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">ID</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">Nom</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">Email</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-white font-inter">Filière ID</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((student) => (
-                  <tr key={student.id}>
-                    <td className="border border-gray-300 px-4 py-2 font-inter text-[#111827]">{student.id}</td>
-                    <td className="border border-gray-300 px-4 py-2 font-inter text-[#111827]">{student.name}</td>
-                    <td className="border border-gray-300 px-4 py-2 font-inter text-[#111827]">{student.email}</td>
-                    <td className="border border-gray-300 px-4 py-2 font-inter text-[#111827]">{student.filiereId}</td>
                   </tr>
                 ))}
               </tbody>
