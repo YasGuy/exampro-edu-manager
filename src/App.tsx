@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { DataProvider } from '@/contexts/DataContext';
-import Layout from '@/components/Layout';
 import Index from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
 import './App.css';
@@ -15,8 +14,8 @@ function App() {
         <Router>
           <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
             <Routes>
-              <Route path="/" element={<Layout><Index /></Layout>} />
-              <Route path="*" element={<Layout><NotFound /></Layout>} />
+              <Route path="/" element={<Index />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
           </div>
